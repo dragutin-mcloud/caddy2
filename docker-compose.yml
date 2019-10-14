@@ -1,0 +1,24 @@
+version: '3.5'
+services:
+
+    caddy:
+     image: dr4g0nsr/caddy:latest
+     container_name: caddy
+     hostname: caddy
+     volumes:
+        - "/etc/letsencrypt:/etc/letsencrypt:ro"
+        - "./Caddyfile:/etc/Caddyfile:ro"
+        - "./web:/srv"
+     command: --conf /etc/Caddyfile --log stdout --agree=1
+     ports:
+      - "2015:2015/tcp"
+      - "81:80/tcp"
+      - "444:443/tcp"
+     networks:
+      - local
+     stdin_open: true
+     tty: true
+
+networks:
+  local:
+    driver: bridge
