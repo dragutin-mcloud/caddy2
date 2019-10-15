@@ -31,10 +31,10 @@ clean: stop ## Clean all volumes mounted locally to NFS (warning, you WILL lost 
 	rm -rf /data/*
 
 build: ## Build the container
-	docker build . -t dr4g0nsr/caddy -t dr4g0nsr/caddy:latest -t dr4g0nsr/caddy:1.0 -t dr4g0nsr/caddy:1
+	docker build . -t dragutin_mcloud/caddy2 -t dragutin_mcloud/caddy2:latest
 
 build-nc: ## Build the container without caching
-	docker build . --no-cache=true -t dr4g0nsr/caddy:latest -t dr4g0nsr/caddy:1.0 -t dr4g0nsr/caddy:1
+	docker build . --no-cache=true -t dragutin_mcloud/caddy2 -t dragutin_mcloud/caddy2:latest
 
 start: ## Start docker containers using docker-compose
 	docker-compose up -d
@@ -56,8 +56,8 @@ connect:
 	@docker exec -it web /bin/bash
 
 push:
-	@docker push dr4g0nsr/caddy
+	@docker push dragutin_mcloud/caddy2
 
 login:
-	@echo "${MYBETTERPASSWORD}" | docker login -u dr4g0nsr --password-stdin
+	@echo "${MYBETTERPASSWORD}" | docker login -u dragutin_mcloud --password-stdin
 

@@ -1,37 +1,9 @@
-FROM golang:1.13-alpine as golang
-
-RUN apk add --no-cache git gcc musl-dev
-
-COPY builder.sh /usr/bin/builder.sh
-
-ARG version="1.0.3"
-ARG plugins="git,minify,jwt,prometheus,ratelimit,cors,realip,expires,cache,geoip"
-ARG enable_telemetry="true"
-
-# Process Wrapper
-RUN go get -v github.com/abiosoft/parent
-
-RUN unset GOROOT
-RUN VERSION=${version} PLUGINS=${plugins} ENABLE_TELEMETRY=${enable_telemetry} /bin/sh /usr/bin/builder.sh
-
-#
-# Final Stage
-#
-FROM alpine:3.10
+FROM docker.io/golang:1.13.1-alpine3.10
 LABEL maintainer "Abiola Ibrahim <abiola89@gmail.com>"
-
-ARG version="1.0.3"
-LABEL caddy_version="$version"
 
 # PHP www-user UID and GID
 ARG PUID="1000"
 ARG PGID="1000"
-
-# Let's Encrypt Agreement
-ENV ACME_AGREE="false"
-
-# Telemetry Stats
-ENV ENABLE_TELEMETRY="$enable_telemetry"
 
 RUN apk add --no-cache \
   ca-certificates \
@@ -95,21 +67,36 @@ RUN curl --silent --show-error --fail --location \
 RUN echo "clear_env = no" >> /etc/php7/php-fpm.conf
 
 # Install Caddy
-COPY --from=golang /install/caddy /usr/bin/caddy
+RUN cd /root && \
+  git clone https://github.com/caddyserver/caddy.git -b v2 && \
+  cd caddy/cmd/caddy && \
+  go build && \
+  go install
+
+RUN mv /go/bin/caddy /usr/bin/caddy
+RUN rm -rf /root/caddy > /dev/null
+
+COPY Caddyfile /etc/caddy/Caddyfile
+COPY index.php /var/www/html/index.php
+
+RUN which caddy
+
+#COPY --from=caddy2 /usr/bin/caddy /usr/bin/caddy
 
 # Validate install
-RUN /usr/bin/caddy -version
-RUN /usr/bin/caddy -plugins
+RUN /usr/bin/caddy version
+RUN /usr/bin/caddy list-modules
 
-EXPOSE 80 443 2015
-VOLUME /root/.caddy /srv
-WORKDIR /srv
+EXPOSE 80 443 2019
+VOLUME /var/www/html
 
-COPY Caddyfile /etc/Caddyfile
-COPY index.php /srv/index.php
+RUN apk add --update supervisor && rm  -rf /tmp/* /var/cache/apk/*
+ADD supervisord.conf /etc/
+RUN apk add bash net-tools
 
-# Install Process Wrapper
-COPY --from=golang /go/bin/parent /bin/parent
+CMD ["/usr/bin/supervisord","--configuration","/etc/supervisord.conf"]
 
-ENTRYPOINT ["/bin/parent", "caddy"]
-CMD ["--conf", "/etc/Caddyfile", "--log", "stdout", "--agree=$ACME_AGREE"]
+#ENTRYPOINT ["supervisord", "--nodaemon", "--configuration", "/etc/supervisord.conf"]
+
+#ENTRYPOINT ["/usr/bin/caddy"]
+#CMD ["run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]

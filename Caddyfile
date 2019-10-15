@@ -1,11 +1,13 @@
-0.0.0.0
+{
+	"experimental_http3": false
+}
 
-browse
-
-fastcgi / 127.0.0.1:9000 php
-
-on startup php-fpm7
-
-log stdout
-
-errors stdout
+sentora.my {
+	root * /var/www/html
+#	encode brotli zstd gzip
+	php_fastcgi localhost:9000
+#	tls /ssl/ssl-cert-snakeoil.pem /ssl/ssl-cert-snakeoil.key
+	tls /ssl/cert.pem /ssl/cert.key
+#    tls self_signed
+	file_server
+}

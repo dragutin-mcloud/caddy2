@@ -1,19 +1,21 @@
 version: '3.5'
 services:
 
-    caddy:
-     image: dr4g0nsr/caddy:latest
-     container_name: caddy
-     hostname: caddy
+    caddy2:
+     image: dragutin_mcloud/caddy2:latest
+     container_name: caddy2
+     hostname: caddy2
      volumes:
         - "/etc/letsencrypt:/etc/letsencrypt:ro"
-        - "./Caddyfile:/etc/Caddyfile:ro"
-        - "./web:/srv"
-     command: --conf /etc/Caddyfile --log stdout --agree=1
+        - "./ssl:/ssl:ro"
+        - "./Caddyfile:/etc/caddy/Caddyfile:ro"
+        - "./web:/var/www/html"
+#     command: --conf /etc/caddy/Caddyfile --log stdout --agree=1
      ports:
-      - "2015:2015/tcp"
-      - "81:80/tcp"
-      - "444:443/tcp"
+      - "2019:2019/tcp"
+      - "80:80/tcp"
+      - "443:443/tcp"
+      - "443:443/udp"
      networks:
       - local
      stdin_open: true
