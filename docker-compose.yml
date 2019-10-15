@@ -2,7 +2,7 @@ version: '3.5'
 services:
 
     caddy2:
-     image: dragutin_mcloud/caddy2:latest
+     image: mclouddragutin/caddy2:latest
      container_name: caddy2
      hostname: caddy2
      volumes:
