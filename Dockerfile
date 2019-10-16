@@ -79,10 +79,6 @@ RUN rm -rf /root/caddy > /dev/null
 COPY Caddyfile /etc/caddy/Caddyfile
 COPY index.php /var/www/html/index.php
 
-RUN which caddy
-
-#COPY --from=caddy2 /usr/bin/caddy /usr/bin/caddy
-
 # Validate install
 RUN /usr/bin/caddy version
 RUN /usr/bin/caddy list-modules
@@ -95,8 +91,3 @@ ADD supervisord.conf /etc/
 RUN apk add bash net-tools
 
 CMD ["/usr/bin/supervisord","--configuration","/etc/supervisord.conf"]
-
-#ENTRYPOINT ["supervisord", "--nodaemon", "--configuration", "/etc/supervisord.conf"]
-
-#ENTRYPOINT ["/usr/bin/caddy"]
-#CMD ["run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
